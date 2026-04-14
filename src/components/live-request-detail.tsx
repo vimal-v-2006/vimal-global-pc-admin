@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AdminRequest } from "@/lib/data";
 import { RequestDetail } from "@/components/request-detail";
+import { REQUESTS_ENDPOINT } from "@/lib/api";
 
 export function LiveRequestDetail({ id }: { id: string }) {
   const [request, setRequest] = useState<AdminRequest | null>(null);
@@ -10,7 +11,7 @@ export function LiveRequestDetail({ id }: { id: string }) {
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:4100/requests", { cache: "no-store" });
+      const response = await fetch(REQUESTS_ENDPOINT, { cache: "no-store" });
       const data: AdminRequest[] = await response.json();
       const match = data.find((item) => item.id === id) ?? null;
       setRequest(match);

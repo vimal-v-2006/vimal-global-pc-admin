@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { AdminRequest } from "@/lib/data";
 import { formatAdminDate } from "@/lib/data";
 import { StatusPill } from "@/components/status-pill";
+import { requestByIdEndpoint } from "@/lib/api";
 
 export function RequestDetail({ request, onUpdated }: { request: AdminRequest; onUpdated?: () => void }) {
   const [updating, setUpdating] = useState(false);
@@ -14,7 +15,7 @@ export function RequestDetail({ request, onUpdated }: { request: AdminRequest; o
     setUpdating(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:4100/requests/${request.id}`, {
+      const response = await fetch(requestByIdEndpoint(request.id), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -29,7 +30,7 @@ export function RequestDetail({ request, onUpdated }: { request: AdminRequest; o
 
       onUpdated?.();
     } catch {
-      setError("Could not mark this request as completed. Make sure the backend is running.");
+      setError("Could not mark this request as completed. Check the backend URL and try again.");
     } finally {
       setUpdating(false);
     }

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { AdminRequest } from "@/lib/data";
 import { RequestList } from "@/components/request-list";
+import { REQUESTS_ENDPOINT } from "@/lib/api";
 
 export function LiveRequestBoard() {
   const [requests, setRequests] = useState<AdminRequest[]>([]);
@@ -13,7 +14,7 @@ export function LiveRequestBoard() {
 
     async function load() {
       try {
-        const response = await fetch("http://localhost:4100/requests", { cache: "no-store" });
+        const response = await fetch(REQUESTS_ENDPOINT, { cache: "no-store" });
         const data = await response.json();
         if (active) setRequests(data);
       } catch {
