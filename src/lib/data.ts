@@ -33,7 +33,7 @@ export type AdminRequest = {
 export function formatAdminDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat("en-IN", {
     year: "numeric",
     month: "short",
     day: "2-digit",
@@ -41,6 +41,6 @@ export function formatAdminDate(value: string) {
     minute: "2-digit",
     second: "2-digit",
     hour12: true,
-    timeZone: "UTC",
-  }).format(date) + " UTC";
+    timeZone: "Asia/Kolkata",
+  }).format(date) + " IST";
 }
