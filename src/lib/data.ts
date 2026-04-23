@@ -9,7 +9,7 @@ export type AdminRequest = {
   phone: string;
   email: string;
   contactApp: string;
-  country: string;
+  country?: string;
   services: string[];
   customRequest: string;
   pcSpecs: {

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { AdminRequest } from "@/lib/data";
 import { formatAdminDate } from "@/lib/data";
@@ -8,7 +9,9 @@ import { StatusPill } from "@/components/status-pill";
 import { requestByIdEndpoint } from "@/lib/api";
 
 export function RequestDetail({ request, onUpdated }: { request: AdminRequest; onUpdated?: () => void }) {
+  const router = useRouter();
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function markCompleted() {
@@ -36,6 +39,29 @@ export function RequestDetail({ request, onUpdated }: { request: AdminRequest; o
     }
   }
 
+  async function deleteCompletedRequest() {
+    const confirmed = window.confirm("Delete this completed request permanently? This will remove the screenshot and all stored data from the database.");
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setError(null);
+    try {
+      const response = await fetch(requestByIdEndpoint(request.id), {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete request");
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch {
+      setError("Could not delete this request. Check the backend URL and try again.");
+      setDeleting(false);
+    }
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <div className="space-y-6 rounded-[1.5rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
@@ -50,7 +76,7 @@ export function RequestDetail({ request, onUpdated }: { request: AdminRequest; o
           <Info label="Phone" value={request.phone} />
           <Info label="Email" value={request.email} />
           <Info label="Contact app" value={request.contactApp} />
-          <Info label="Country" value={request.country} />
+          {request.country ? <Info label="Country" value={request.country} /> : null}
         </div>
         <section>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Services</p>
@@ -157,14 +183,26 @@ export function RequestDetail({ request, onUpdated }: { request: AdminRequest; o
 
         <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
           <p className="text-lg font-semibold text-white">Admin actions</p>
-          <button
-            type="button"
-            onClick={markCompleted}
-            disabled={updating || request.requestStatus === "Completed"}
-            className="mt-4 rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {request.requestStatus === "Completed" ? "Already completed" : updating ? "Saving..." : "Mark as completed"}
-          </button>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={markCompleted}
+              disabled={updating || deleting || request.requestStatus === "Completed"}
+              className="rounded-full bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {request.requestStatus === "Completed" ? "Already completed" : updating ? "Saving..." : "Mark as completed"}
+            </button>
+            {request.requestStatus === "Completed" ? (
+              <button
+                type="button"
+                onClick={deleteCompletedRequest}
+                disabled={deleting || updating}
+                className="rounded-full border border-rose-400/30 bg-rose-400/10 px-5 py-3 text-sm font-semibold text-rose-100 transition hover:bg-rose-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {deleting ? "Deleting..." : "Delete permanently"}
+              </button>
+            ) : null}
+          </div>
           {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
         </div>
       </div>
